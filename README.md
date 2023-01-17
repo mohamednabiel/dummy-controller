@@ -1,56 +1,52 @@
 # anynines-homework
-// TODO(user): Add simple overview of use/purpose
+Basically you will find here how to run and install the dummy operator inside your kubernetes cluster
 
-## Description
-// TODO(user): An in-depth paragraph about your project and overview of use
+## Prerequisite
+1. Local kubernetes cluster ,  You can use [minikube](https://minikube.sigs.k8s.io/docs/start/)
+2. Operator SDK CLI, [Download](https://sdk.operatorframework.io/docs/installation/)
+3. Kubectl CLI installed, [Here](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
+4. Docker, [Download](https://docs.docker.com/get-docker/)
+5. GO, [Download](https://go.dev/dl/)
 
 ## Getting Started
-You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.
-**Note:** Your controller will automatically use the current context in your kubeconfig file (i.e. whatever cluster `kubectl cluster-info` shows).
+After installing the Prerequisites tools, we will need to follow some set of steps to have our controller deployed intp the cluster.
+**Note:** We have 2 options to run our kubernetes cluster:
+1. Run it outside the cluster, your controller will automatically use the current context in your kubeconfig file (i.e. whatever cluster `kubectl cluster-info` shows).
+2. Run inside the cluster as a deployment.
 
-### Running on the cluster
-1. Install Instances of Custom Resources:
 
+### Running the operator
+In a simple words, we will deal with multiple main folders:
+1. api/v1alpha1, for editning our types structures for the needed specs or status.
+2. config/crd/bases/interview.com_dummies.yaml file to install the CRD inside our cluster.
+3. conrollers folder, to modify our reconcile loop mechanism.
+4. tobeinstall folder for the needed manifests to be installed inside our cluster to make the operator ready.
+
+### Let's Start
+1. Install Instances of Custom Resources::
 ```sh
-kubectl apply -f config/samples/
+kubectl apply -f tobeinstall/5-interview.com_dummies_Crd.yaml
 ```
-
+**To run the operator outside the cluster :** Just run from the root of the project, or Proceed to step 2.
+```sh
+go run main.go
+```
 2. Build and push your image to the location specified by `IMG`:
 	
 ```sh
 make docker-build docker-push IMG=<some-registry>/anynines-homework:tag
 ```
-	
-3. Deploy the controller to the cluster with the image specified by `IMG`:
+**Ex:**	make docker-build IMG=mohamednabiel717/controller:0.0.1,make docker-push IMG=mohamednabiel717/controller:0.0.1
+
+3. Deploy the manifiests under tobeinstall/ folder with the order found.
 
 ```sh
-make deploy IMG=<some-registry>/anynines-homework:tag
+kubectl apply -f tobeinstall/1,2,3,4,6,7-
 ```
+**Note:** We already installed 5-interview.com_dummies_Crd.yaml above.
 
-### Uninstall CRDs
-To delete the CRDs from the cluster:
 
-```sh
-make uninstall
-```
-
-### Undeploy controller
-UnDeploy the controller to the cluster:
-
-```sh
-make undeploy
-```
-
-## Contributing
-// TODO(user): Add detailed information on how you would like others to contribute to this project
-
-### How it works
-This project aims to follow the Kubernetes [Operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
-
-It uses [Controllers](https://kubernetes.io/docs/concepts/architecture/controller/) 
-which provides a reconcile function responsible for synchronizing resources untile the desired state is reached on the cluster 
-
-### Test It Out
+### Test It Out 
 1. Install the CRDs into the cluster:
 
 ```sh
@@ -63,32 +59,9 @@ make install
 make run
 ```
 
-**NOTE:** You can also run this in one step by running: `make install run`
-
 ### Modifying the API definitions
 If you are editing the API definitions, generate the manifests such as CRs or CRDs using:
 
 ```sh
 make manifests
 ```
-
-**NOTE:** Run `make --help` for more information on all potential `make` targets
-
-More information can be found via the [Kubebuilder Documentation](https://book.kubebuilder.io/introduction.html)
-
-## License
-
-Copyright 2023.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
