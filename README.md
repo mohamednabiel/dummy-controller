@@ -9,7 +9,7 @@ Basically you will find here how to run and install the dummy operator inside yo
 5. GO, [Download](https://go.dev/dl/)
 
 ## Getting Started
-After installing the Prerequisites tools, we will need to follow some set of steps to have our controller deployed intp the cluster.
+After installing the Prerequisites tools, we will need to follow some set of steps to have our controller deployed into the cluster.
 **Note:** We have 2 options to run our kubernetes cluster:
 1. Run it outside the cluster, your controller will automatically use the current context in your kubeconfig file (i.e. whatever cluster `kubectl cluster-info` shows).
 2. Run inside the cluster as a deployment.

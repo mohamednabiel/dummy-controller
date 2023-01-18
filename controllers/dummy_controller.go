@@ -29,7 +29,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-// DummyReconciler reconciles a Dummy object
 type DummyReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
@@ -42,15 +41,6 @@ type DummyReconciler struct {
 // +kubebuilder:rbac:groups="",resources=pods/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups="",resources=pods/finalizers,verbs=update
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the Dummy object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 const dummfinalizer = "dummy.finalizer.interview.com"
 
 func (r *DummyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -66,14 +56,14 @@ func (r *DummyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		return ctrl.Result{}, nil
 	}
 	log.Info("Dummy custom resource fetched successfully", "Dummy.Name:", dummy.Name, "Dummy.Namespace:", dummy.Namespace, "Dummy.Spec.Message:", dummy.Spec.Message)
-	//udate the SpecEcho status
+
 	dummy.Status.SpecEcho = dummy.Spec.Message
 	if err := r.Status().Update(ctx, dummy); err != nil {
 		log.Info("unable to update Dummy custom resource SpecEcho status", "Dummy.Name:", dummy.Name, "Dummy.Namespace:", dummy.Namespace, "Dummy.Status.SpecEcho:", dummy.Status.SpecEcho)
 		return ctrl.Result{}, nil
 	}
 	log.Info("Dummy custom resource status updated successfully", "Dummy.Name:", dummy.Name, "Dummy.Namespace:", dummy.Namespace, "Dummy.Status.SpecEcho:", dummy.Status.SpecEcho)
-	//check if the dummy custom resource status is pending
+
 	if dummy.Status.PodStatus == "Pending" {
 		log.Info("Dummy Status:PodStatus is Pending", "Dummy.Name:", dummy.Name, "Dummy.Namespace:", dummy.Namespace)
 	} else if dummy.Status.PodStatus == "Running" {
@@ -89,12 +79,11 @@ func (r *DummyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	}
 	pod := newPodForCR(dummy)
 
-	// Set Dummy instance as the owner and controller
 	if err := ctrl.SetControllerReference(dummy, pod, r.Scheme); err != nil {
 		log.Info("unable to set owner reference on new pod", "pod.Name:", pod.Name, "pod.Namespace:", pod.Namespace)
 		return ctrl.Result{}, nil
 	}
-	//check exesting of the nginx  pod and create if not found
+
 	found := &corev1.Pod{}
 	err := r.Get(ctx, client.ObjectKey{Name: pod.Name, Namespace: pod.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
@@ -118,7 +107,6 @@ func (r *DummyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	}
 	log.Info("Pod already exists", "pod.Name:", pod.Name, "pod.Namespace:", pod.Namespace)
 
-	//check if the dummy resource is marked to be deleted by checking the deletion timestamp is set
 	if dummy.GetDeletionTimestamp() == nil {
 		// The dummy is not being deleted,
 		// we add our finalizer  here  if it's not updated and update the dummy object.
@@ -141,7 +129,7 @@ func (r *DummyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 			log.Info("Dummy custom resource is marked to be deleted", "Dummy.Name:", dummy.Name, "Dummy.Namespace:", dummy.Namespace)
 			log.Info("Dummy custom resource deleted successfully", "Dummy.Name:", dummy.Name, "Dummy.Namespace:", dummy.Namespace)
 			log.Info("Pod deleted successfully", "pod.Name:", pod.Name, "pod.Namespace:", pod.Namespace)
-			// remove our finalizer from the list and update it.
+
 			dummy.SetFinalizers(removeString(dummy.GetFinalizers(), dummfinalizer))
 			if err := r.Update(ctx, dummy); err != nil {
 				log.Info("unable to remove finalizer from Dummy custom resource ", "Dummy.Name:", dummy.Name, "Dummy.Namespace:", dummy.Namespace)
