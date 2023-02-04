@@ -1,4 +1,4 @@
-# anynines-homework
+# Dummy-controller
 Basically you will find here how to run and install the dummy operator inside your kubernetes cluster
 
 ## Prerequisite
